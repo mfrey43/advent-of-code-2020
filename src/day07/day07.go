@@ -16,7 +16,7 @@ func main() {
 }
 
 func one() {
-	absPath, _ := filepath.Abs("src/day06/input.txt")
+	absPath, _ := filepath.Abs("src/day07/input.txt")
 	file, err := os.Open(absPath)
 	if err != nil {
 		log.Fatal(err)
@@ -66,7 +66,7 @@ func one() {
 }
 
 func two() {
-	absPath, _ := filepath.Abs("src/day06/input.txt")
+	absPath, _ := filepath.Abs("src/day07/input.txt")
 	file, err := os.Open(absPath)
 	if err != nil {
 		log.Fatal(err)
