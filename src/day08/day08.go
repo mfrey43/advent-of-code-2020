@@ -76,7 +76,6 @@ func two() {
 	}
 	defer file.Close()
 	var lines []instruction
-	var stack []instruction
 
 	scanner := bufio.NewScanner(file)
 	lineNum := 0
@@ -92,6 +91,7 @@ func two() {
 	acc := 0
 	pointer := 0
 	seen := make(map[int]bool)
+	var stack []instruction
 	stacking := true
 	for true {
 		if pointer >= len(lines) {
@@ -99,25 +99,19 @@ func two() {
 		}
 		instr := lines[pointer]
 
-		if seen[pointer] {
+		if seen[pointer] { // we entered a loop
 			if stacking {
 				stacking = false
 			}
-			// backtrack to the last jmp or nop command
-			for i := len(stack) - 1; i >= 0; i-- {
-				seen[stack[i].line] = false
-				if stack[i].cmd == "jmp" || stack[i].cmd == "nop" {
-					pointer = stack[i].line
-					instr = stack[i]
-					acc = stack[i].acc
-					if instr.cmd == "jmp" {
-						instr.cmd = "nop"
-					} else if instr.cmd == "nop" {
-						instr.cmd = "jmp"
-					}
-					stack = stack[:i]
-					break
-				}
+			// go back to the last jmp or nop command
+			instr = stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+			pointer = instr.line
+			acc = instr.acc
+			if instr.cmd == "jmp" {
+				instr.cmd = "nop"
+			} else if instr.cmd == "nop" {
+				instr.cmd = "jmp"
 			}
 		}
 		seen[pointer] = true
@@ -127,13 +121,18 @@ func two() {
 			pointer++
 		} else if instr.cmd == "jmp" {
 			pointer += instr.num
+
+			if stacking {
+				instr.acc = acc
+				stack = append(stack, instr)
+			}
 		} else if instr.cmd == "nop" {
 			pointer++
-		}
-		instr.acc = acc
 
-		if stacking {
-			stack = append(stack, instr)
+			if stacking {
+				instr.acc = acc
+				stack = append(stack, instr)
+			}
 		}
 	}
 
